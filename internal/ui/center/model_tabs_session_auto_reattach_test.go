@@ -105,6 +105,36 @@ func TestReattachActiveTab_DeduplicatesInFlight(t *testing.T) {
 	}
 }
 
+func TestReattachActiveTab_AllowsStoppedTab(t *testing.T) {
+	m := newTestModel()
+	ws := newTestWorkspace("ws", "/repo/ws")
+	wsID := string(ws.ID())
+
+	tab := &Tab{
+		ID:          TabID("tab-stopped"),
+		Assistant:   "claude",
+		Workspace:   ws,
+		Running:     false,
+		Detached:    false,
+		SessionName: "sess-stopped",
+	}
+	m.tabsByWorkspace[wsID] = []*Tab{tab}
+	m.activeTabByWorkspace[wsID] = 0
+	m.workspace = ws
+
+	cmd := m.ReattachActiveTab()
+	if cmd == nil {
+		t.Fatalf("expected non-nil cmd for stopped tab")
+	}
+
+	tab.mu.Lock()
+	inFlight := tab.reattachInFlight
+	tab.mu.Unlock()
+	if !inFlight {
+		t.Fatalf("expected reattachInFlight=true for stopped tab reattach")
+	}
+}
+
 func TestReattachActiveTab_ClearsInFlightOnFailureAndSuccess(t *testing.T) {
 	m := newTestModel()
 	ws := newTestWorkspace("ws", "/repo/ws")

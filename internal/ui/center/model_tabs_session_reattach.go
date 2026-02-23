@@ -10,7 +10,7 @@ import (
 	"github.com/andyrewlee/amux/internal/tmux"
 )
 
-// ReattachActiveTab reattaches to a detached tmux session.
+// ReattachActiveTab reattaches to a detached/stopped tmux session.
 func (m *Model) ReattachActiveTab() tea.Cmd {
 	tabs := m.getTabs()
 	activeIdx := m.getActiveTabIdx()
@@ -22,14 +22,16 @@ func (m *Model) ReattachActiveTab() tea.Cmd {
 		return nil
 	}
 	tab.mu.Lock()
+	running := tab.Running
 	detached := tab.Detached
 	reattachInFlight := tab.reattachInFlight
 	sessionName := tab.SessionName
-	if detached && !reattachInFlight {
+	canReattach := detached || !running
+	if canReattach && !reattachInFlight {
 		tab.reattachInFlight = true
 	}
 	tab.mu.Unlock()
-	if !detached {
+	if !canReattach {
 		return nil
 	}
 	if reattachInFlight {
