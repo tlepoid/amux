@@ -289,14 +289,10 @@ func (a *App) handleWorkspaceActivated(msg messages.WorkspaceActivated) []tea.Cm
 			// When no center-tab signal exists, keep the current focus instead of
 			// forcing a dashboard/center jump.
 			if hasCenterTabs {
-				// focusPane(PaneCenter) already performs the reattach attempt;
-				// mark it as queued regardless of returned command to avoid
-				// coupling deduplication to a nil/non-nil command shape.
-				focusCmd := a.focusPane(messages.PaneCenter)
+				// Do not auto-focus center on workspace activation; keep focus
+				// on whichever pane the user is currently in so dashboard
+				// navigation (j/k) is not interrupted.
 				centerFocusQueuedReattach = true
-				if focusCmd != nil {
-					cmds = append(cmds, focusCmd)
-				}
 			}
 		}
 		if !centerVisible {

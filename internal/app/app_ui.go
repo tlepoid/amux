@@ -34,12 +34,12 @@ func (a *App) focusPane(pane messages.PaneType) tea.Cmd {
 // focusPaneLeft moves focus one pane to the left, respecting layout visibility.
 func (a *App) focusPaneLeft() tea.Cmd {
 	switch a.focusedPane {
-	case messages.PaneSidebarTerminal, messages.PaneSidebar:
+	case messages.PaneSidebar:
 		if a.layout != nil && a.layout.ShowCenter() {
 			return a.focusPane(messages.PaneCenter)
 		}
 		return a.focusPane(messages.PaneDashboard)
-	case messages.PaneCenter:
+	case messages.PaneCenter, messages.PaneSidebarTerminal:
 		return a.focusPane(messages.PaneDashboard)
 	}
 	return nil
@@ -71,7 +71,7 @@ func (a *App) focusPaneRight() tea.Cmd {
 		if a.layout != nil && a.layout.ShowSidebar() {
 			return a.focusPane(messages.PaneSidebar)
 		}
-	case messages.PaneCenter:
+	case messages.PaneCenter, messages.PaneSidebarTerminal:
 		if a.layout != nil && a.layout.ShowSidebar() {
 			return a.focusPane(messages.PaneSidebar)
 		}
